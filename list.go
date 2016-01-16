@@ -1,8 +1,9 @@
 package main
-import ( 
-    "fmt"
-    "io/ioutil"
-    "github.com/nsf/termbox-go"
+
+import (
+	"fmt"
+	"github.com/nsf/termbox-go"
+	"io/ioutil"
 )
 
 func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
@@ -14,40 +15,59 @@ func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
 
 func main() {
 
-    err := termbox.Init()
-    if err != nil {
-        panic(err)
-    }
-    defer termbox.Close()
+	line := 2
 
-    files, _ := ioutil.ReadDir("./")
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer termbox.Close()
 
-    tbprint(0,1, termbox.ColorDefault, termbox.ColorDefault,  "\u2191..")
+	files, _ := ioutil.ReadDir("./")
 
-    y :=2;
-    for _, f := range files {
-        tbprint(0,y, termbox.ColorDefault, termbox.ColorDefault, "\u2193")
-        tbprint(1,y, termbox.ColorDefault, termbox.ColorDefault, (f.Name()))
-        y++
-    }
+	tbprint(0, 1, termbox.ColorDefault, termbox.ColorDefault, "\u2191..")
 
-    len := y-2
+	y := 2
+	for _, f := range files {
 
-    tbprint(0,0, termbox.ColorBlack, termbox.ColorWhite,  fmt.Sprintf("LIST File Selection 1 of %d",len));
+		if line == y {
+			tbprint(0, y, termbox.ColorBlack, termbox.ColorWhite, "\u2193")
+			tbprint(1, y, termbox.ColorBlack, termbox.ColorWhite, (f.Name()))
+		} else {
+			tbprint(0, y, termbox.ColorDefault, termbox.ColorDefault, "\u2193")
+			tbprint(1, y, termbox.ColorDefault, termbox.ColorDefault, (f.Name()))
+		}
+		y++
 
-    tbprint(0,y, termbox.ColorBlack, termbox.ColorWhite,  fmt.Sprintf("Files: %d \u2666",len));
+	}
 
-    termbox.Flush()
+	len := y - 2
 
-    for {
-        switch ev := termbox.PollEvent(); ev.Type {
-        case termbox.EventKey:
-            switch ev.Key {
-            default:
-                panic("exit")
-            }
-        case termbox.EventError:
-            panic(ev.Err)
-        }
-    }
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of %d", len))
+
+	tbprint(0, y, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: %d \u2666", len))
+
+	termbox.Flush()
+
+mainloop:
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			switch ev.Key {
+			case termbox.KeyEsc:
+				break mainloop
+
+			case termbox.KeyArrowUp:
+				break mainloop
+
+			case termbox.KeyArrowDown:
+				break mainloop
+
+			default:
+				break mainloop
+			}
+		case termbox.EventError:
+			panic(ev.Err)
+		}
+	}
 }
