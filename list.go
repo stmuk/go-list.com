@@ -92,14 +92,12 @@ mainloop:
 				defer inFile.Close()
 				scanner := bufio.NewScanner(inFile)
 				scanner.Split(bufio.ScanLines)
-			scan:
+
 				for scanner.Scan() {
 					tbprint(0, lcount, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
 					lcount++
 					if lcount == height {
-						termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-						lcount = 0
-						continue scan
+						break
 					}
 				}
 
