@@ -17,11 +17,11 @@ func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
 
 func redraw(line int, files []os.FileInfo) int {
 
-    if line == 1 {
-        tbprint(0, 1, termbox.ColorBlack, termbox.ColorWhite, "\u2191..") // up arrow
-    } else {
-        tbprint(0, 1, termbox.ColorDefault, termbox.ColorDefault, "\u2191..") // up arrow
-    }
+	if line == 1 {
+		tbprint(0, 1, termbox.ColorBlack, termbox.ColorWhite, "\u2191..") // up arrow
+	} else {
+		tbprint(0, 1, termbox.ColorDefault, termbox.ColorDefault, "\u2191..") // up arrow
+	}
 
 	i := 2
 	for _, f := range files {
@@ -39,8 +39,8 @@ func redraw(line int, files []os.FileInfo) int {
 	return i
 }
 
-func fs(width int) string  {
-    return fmt.Sprintf("%%-%dd", width)
+func fs(width int) string {
+	return fmt.Sprintf("%%-%dd", width)
 }
 
 func main() {
@@ -61,56 +61,64 @@ func main() {
 
 	len := i - 2
 
-	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of " + fs(width), len))
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+fs(width), len))
 
-	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+ fs(width/2) +"\u2666", len)) // diamond
+	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+fs(width/2)+"\u2666", len)) // diamond
 
 	termbox.Flush()
 
-    lcount := 1
+	lcount := 1
 
-    mainloop:
+	file_display := 0
+
+mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
+
 			case termbox.KeyEsc:
-				break mainloop
+				if file_display == 0 {
+					break mainloop
+				}
+				file_display = 0
+				main()
 
-            case termbox.KeyCtrlM:
-                termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-                tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
-                inFile, _ := os.Open(files[line-2].Name())
-                defer inFile.Close()
-                scanner := bufio.NewScanner(inFile)
-                scanner.Split(bufio.ScanLines)
-                scan:
-                for scanner.Scan() {
-                    tbprint(0, lcount, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
-                    lcount++
-                    if lcount == height {
-                        termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-                        lcount = 0
-                        continue scan
-                    }
-                }
+			case termbox.KeyCtrlM:
+				file_display++
+				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
+				inFile, _ := os.Open(files[line-2].Name())
+				defer inFile.Close()
+				scanner := bufio.NewScanner(inFile)
+				scanner.Split(bufio.ScanLines)
+			scan:
+				for scanner.Scan() {
+					tbprint(0, lcount, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
+					lcount++
+					if lcount == height {
+						termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+						lcount = 0
+						continue scan
+					}
+				}
 
-                termbox.Flush()
-                continue mainloop
+				termbox.Flush()
+				continue mainloop
 
-            case termbox.KeyArrowUp:
-                if line != 1 {
-                    line--
-                } 
-                _ = redraw(line, files)
-                termbox.Flush()
+			case termbox.KeyArrowUp:
+				if line != 1 {
+					line--
+				}
+				_ = redraw(line, files)
+				termbox.Flush()
 
-            case termbox.KeyArrowDown:
-                if line != i-1 {
-                    line++
-                }
-                _ = redraw(line, files)
-                termbox.Flush()
+			case termbox.KeyArrowDown:
+				if line != i-1 {
+					line++
+				}
+				_ = redraw(line, files)
+				termbox.Flush()
 
 			default:
 				continue mainloop
