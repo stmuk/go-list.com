@@ -105,18 +105,22 @@ mainloop:
 				continue mainloop
 
 			case termbox.KeyArrowUp:
-				if line != 1 {
-					line--
+				if file_display == 0 {
+					if line != 1 {
+						line--
+					}
+					_ = redraw(line, files)
+					termbox.Flush()
 				}
-				_ = redraw(line, files)
-				termbox.Flush()
 
 			case termbox.KeyArrowDown:
-				if line != i-1 {
-					line++
+				if file_display == 0 {
+					if line != i-1 {
+						line++
+					}
+					_ = redraw(line, files)
+					termbox.Flush()
 				}
-				_ = redraw(line, files)
-				termbox.Flush()
 
 			default:
 				continue mainloop
