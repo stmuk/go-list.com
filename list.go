@@ -8,6 +8,18 @@ import (
 	"os"
 )
 
+func printRange(scanner *bufio.Scanner, start int, finish int) {
+	count := 0
+	for scanner.Scan() {
+		if count >= start {
+			tbprint(0, count, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
+		}
+		count++
+		if count == finish {
+			break
+		}
+	}
+}
 func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
 	for _, c := range msg {
 		termbox.SetCell(x, y, c, fg, bg)
@@ -67,8 +79,6 @@ func main() {
 
 	termbox.Flush()
 
-	lcount := 1
-
 	file_display := 0
 
 mainloop:
@@ -93,13 +103,7 @@ mainloop:
 				scanner := bufio.NewScanner(inFile)
 				scanner.Split(bufio.ScanLines)
 
-				for scanner.Scan() {
-					tbprint(0, lcount, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
-					lcount++
-					if lcount == height {
-						break
-					}
-				}
+				printRange(scanner, 0, height)
 
 				termbox.Flush()
 				continue mainloop
