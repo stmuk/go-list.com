@@ -18,7 +18,7 @@ func printRange(scanner *bufio.Scanner, start int, finish int) {
 
 		}
 		count++
-		if count == finish {
+		if count == finish+start {
 			break
 		}
 	}
