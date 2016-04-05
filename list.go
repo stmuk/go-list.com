@@ -123,15 +123,13 @@ mainloop:
 					if line != 1 {
 						line--
 					}
-					_ = redraw(line, files)
 					termbox.Flush()
 				} else if currLine != 0 {
-					// FIXME
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine--
 					printRange(inFile, currLine, height)
-					termbox.Flush()
 				}
+				termbox.Flush()
 				continue mainloop
 
 			case termbox.KeyArrowDown:
@@ -140,14 +138,13 @@ mainloop:
 						line++
 					}
 					_ = redraw(line, files)
-					termbox.Flush()
 				} else if currLine != height {
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine++
 					log.Printf("down: %v", currLine)
 					printRange(inFile, currLine, height)
-					termbox.Flush()
 				}
+				termbox.Flush()
 				continue mainloop
 
 			default:
