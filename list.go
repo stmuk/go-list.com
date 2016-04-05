@@ -9,8 +9,9 @@ import (
 	"os"
 )
 
-func printRange(scanner *bufio.Scanner, start int, finish int) {
+func printRange(inFile *os.File, scanner *bufio.Scanner, start int, finish int) {
 	count := 1
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, inFile.Name())
 	for scanner.Scan() {
 		if count >= start {
 			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
@@ -112,7 +113,7 @@ mainloop:
 				scanner = bufio.NewScanner(inFile)
 				scanner.Split(bufio.ScanLines)
 
-				printRange(scanner, 0, height)
+				printRange(inFile, scanner, 0, height)
 
 				termbox.Flush()
 				continue mainloop
@@ -131,7 +132,7 @@ mainloop:
 					inFile.Seek(0, 0)
 					scanner = bufio.NewScanner(inFile)
 					scanner.Split(bufio.ScanLines)
-					printRange(scanner, currLine, height)
+					printRange(inFile, scanner, currLine, height)
 					termbox.Flush()
 				}
 				continue mainloop
@@ -150,7 +151,7 @@ mainloop:
 					scanner = bufio.NewScanner(inFile)
 					scanner.Split(bufio.ScanLines)
 					log.Printf("down: %v", currLine)
-					printRange(scanner, currLine, height)
+					printRange(inFile, scanner, currLine, height)
 					termbox.Flush()
 				}
 				continue mainloop
