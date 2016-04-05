@@ -9,15 +9,15 @@ import (
 	"os"
 )
 
-func printRange(inFile *os.File, start int, finish int) {
+func printRange(inFile *os.File, start int, finish int, width int) {
 	count := 1
-	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, inFile.Name())
 	inFile.Seek(0, 0)
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		if count >= start {
 			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
+			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(fs(width)+"", inFile.Name()))
 			log.Printf("pr: %v %v ", count, count-start)
 
 		}
@@ -60,7 +60,7 @@ func redraw(line int, files []os.FileInfo) int {
 }
 
 func fs(width int) string {
-	return fmt.Sprintf("%%-%dd", width)
+	return fmt.Sprintf("%%-%vv", width)
 }
 
 func main() {
@@ -113,7 +113,7 @@ mainloop:
 				inFile, _ = os.Open(files[line-2].Name())
 				defer inFile.Close()
 
-				printRange(inFile, 0, height)
+				printRange(inFile, 0, height, width)
 
 				termbox.Flush()
 				continue mainloop
@@ -127,7 +127,7 @@ mainloop:
 				} else if currLine != 0 {
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine--
-					printRange(inFile, currLine, height)
+					printRange(inFile, currLine, height, width)
 				}
 				termbox.Flush()
 				continue mainloop
@@ -142,7 +142,7 @@ mainloop:
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine++
 					log.Printf("down: %v", currLine)
-					printRange(inFile, currLine, height)
+					printRange(inFile, currLine, height, width)
 				}
 				termbox.Flush()
 				continue mainloop
