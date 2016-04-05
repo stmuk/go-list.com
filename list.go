@@ -14,6 +14,8 @@ func printRange(scanner *bufio.Scanner, start int, finish int) {
 	for scanner.Scan() {
 		if count >= start {
 			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
+			log.Printf("pr: %v %v ", count, count-start)
+
 		}
 		count++
 		if count == finish {
@@ -87,6 +89,7 @@ func main() {
 	currLine := 1
 	file_display := 0
 	var scanner *bufio.Scanner
+	var inFile *os.File
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -104,7 +107,7 @@ mainloop:
 				file_display++
 				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
-				inFile, _ := os.Open(files[line-2].Name())
+				inFile, _ = os.Open(files[line-2].Name())
 				defer inFile.Close()
 				scanner = bufio.NewScanner(inFile)
 				scanner.Split(bufio.ScanLines)
@@ -125,6 +128,9 @@ mainloop:
 					// FIXME
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine--
+					inFile.Seek(0, 0)
+					scanner = bufio.NewScanner(inFile)
+					scanner.Split(bufio.ScanLines)
 					printRange(scanner, currLine, height)
 					termbox.Flush()
 				}
@@ -140,6 +146,10 @@ mainloop:
 				} else if currLine != height {
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine++
+					inFile.Seek(0, 0)
+					scanner = bufio.NewScanner(inFile)
+					scanner.Split(bufio.ScanLines)
+					log.Printf("down: %v", currLine)
 					printRange(scanner, currLine, height)
 					termbox.Flush()
 				}
