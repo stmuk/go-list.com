@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func printRange(scanner *bufio.Scanner, start int, finish int) {
+func printRange(scanner *bufio.Scanner, start int, finish int) int {
 	count := 0
 	for scanner.Scan() {
 		if count >= start {
@@ -19,6 +19,7 @@ func printRange(scanner *bufio.Scanner, start int, finish int) {
 			break
 		}
 	}
+	return start
 }
 func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
 	for _, c := range msg {
@@ -79,8 +80,9 @@ func main() {
 
 	termbox.Flush()
 
+	currLine := 0
 	file_display := 0
-
+	var scanner *bufio.Scanner
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -100,10 +102,10 @@ mainloop:
 				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
 				inFile, _ := os.Open(files[line-2].Name())
 				defer inFile.Close()
-				scanner := bufio.NewScanner(inFile)
+				scanner = bufio.NewScanner(inFile)
 				scanner.Split(bufio.ScanLines)
 
-				printRange(scanner, 0, height)
+				currLine = printRange(scanner, 0, height)
 
 				termbox.Flush()
 				continue mainloop
@@ -114,8 +116,14 @@ mainloop:
 						line--
 					}
 					_ = redraw(line, files)
-					termbox.Flush()
+				} else {
+					// FIXME
+					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+					currLine--
+					currLine = printRange(scanner, currLine, height)
 				}
+				termbox.Flush()
+				continue mainloop
 
 			case termbox.KeyArrowDown:
 				if file_display == 0 {
@@ -123,8 +131,13 @@ mainloop:
 						line++
 					}
 					_ = redraw(line, files)
-					termbox.Flush()
+				} else {
+					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+					currLine++
+					currLine = printRange(scanner, currLine, height)
 				}
+				termbox.Flush()
+				continue mainloop
 
 			default:
 				continue mainloop
