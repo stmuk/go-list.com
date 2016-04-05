@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"github.com/nsf/termbox-go"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
 func printRange(scanner *bufio.Scanner, start int, finish int) {
-	count := 0
+	count := 1
 	for scanner.Scan() {
 		if count >= start {
-			tbprint(0, count, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
+			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
 		}
 		count++
 		if count == finish {
@@ -57,6 +58,9 @@ func fs(width int) string {
 }
 
 func main() {
+	f, _ := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	defer f.Close()
+	log.SetOutput(f)
 
 	line := 1 // default reverse video line
 
@@ -80,7 +84,7 @@ func main() {
 
 	termbox.Flush()
 
-	currLine := 0
+	currLine := 1
 	file_display := 0
 	var scanner *bufio.Scanner
 mainloop:
