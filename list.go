@@ -88,7 +88,7 @@ func main() {
 	termbox.Flush()
 
 	currLine := 1
-	file_display := 0
+	fileDisplay := 0
 	var scanner *bufio.Scanner
 	var inFile *os.File
 mainloop:
@@ -98,14 +98,14 @@ mainloop:
 			switch ev.Key {
 
 			case termbox.KeyEsc:
-				if file_display == 0 {
+				if fileDisplay == 0 {
 					break mainloop
 				}
-				file_display = 0
+				fileDisplay = 0
 				main()
 
 			case termbox.KeyCtrlM:
-				file_display++
+				fileDisplay++
 				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
 				inFile, _ = os.Open(files[line-2].Name())
@@ -119,7 +119,7 @@ mainloop:
 				continue mainloop
 
 			case termbox.KeyArrowUp:
-				if file_display == 0 {
+				if fileDisplay == 0 {
 					if line != 1 {
 						line--
 					}
@@ -138,7 +138,7 @@ mainloop:
 				continue mainloop
 
 			case termbox.KeyArrowDown:
-				if file_display == 0 {
+				if fileDisplay == 0 {
 					if line != i-1 {
 						line++
 					}
