@@ -9,9 +9,12 @@ import (
 	"os"
 )
 
-func printRange(inFile *os.File, scanner *bufio.Scanner, start int, finish int) {
+func printRange(inFile *os.File, start int, finish int) {
 	count := 1
 	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, inFile.Name())
+	inFile.Seek(0, 0)
+	scanner := bufio.NewScanner(inFile)
+	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		if count >= start {
 			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
@@ -89,7 +92,6 @@ func main() {
 
 	currLine := 1
 	fileDisplay := 0
-	var scanner *bufio.Scanner
 	var inFile *os.File
 mainloop:
 	for {
@@ -110,10 +112,8 @@ mainloop:
 				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
 				inFile, _ = os.Open(files[line-2].Name())
 				defer inFile.Close()
-				scanner = bufio.NewScanner(inFile)
-				scanner.Split(bufio.ScanLines)
 
-				printRange(inFile, scanner, 0, height)
+				printRange(inFile, 0, height)
 
 				termbox.Flush()
 				continue mainloop
@@ -129,10 +129,7 @@ mainloop:
 					// FIXME
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine--
-					inFile.Seek(0, 0)
-					scanner = bufio.NewScanner(inFile)
-					scanner.Split(bufio.ScanLines)
-					printRange(inFile, scanner, currLine, height)
+					printRange(inFile, currLine, height)
 					termbox.Flush()
 				}
 				continue mainloop
@@ -147,11 +144,8 @@ mainloop:
 				} else if currLine != height {
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine++
-					inFile.Seek(0, 0)
-					scanner = bufio.NewScanner(inFile)
-					scanner.Split(bufio.ScanLines)
 					log.Printf("down: %v", currLine)
-					printRange(inFile, scanner, currLine, height)
+					printRange(inFile, currLine, height)
 					termbox.Flush()
 				}
 				continue mainloop
