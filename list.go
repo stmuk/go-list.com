@@ -17,12 +17,12 @@ func printRange(inFile *os.File, start int, finish int, width int) {
 	for scanner.Scan() {
 		if count >= start {
 			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
-			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(fs(width)+"", inFile.Name()))
 			log.Printf("pr: %v %v ", count, count-start)
 
 		}
 		count++
 		if count == finish+start {
+			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(fs(width)+"", inFile.Name()))
 			break
 		}
 	}
@@ -123,7 +123,6 @@ mainloop:
 					if line != 1 {
 						line--
 					}
-					termbox.Flush()
 				} else if currLine != 0 {
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine--
