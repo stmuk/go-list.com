@@ -3,15 +3,19 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/nsf/termbox-go"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/nsf/termbox-go"
 )
 
 func printRange(inFile *os.File, start int, finish int, width int) {
 	count := 1
-	inFile.Seek(0, 0)
+	_, err := inFile.Seek(0, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
@@ -64,13 +68,19 @@ func fs(width int) string {
 }
 
 func main() {
+	var err error
 	f, _ := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 	log.SetOutput(f)
 
 	line := 1 // default reverse video line
 
-	err := termbox.Init()
+	err = termbox.Init()
 	width, height := termbox.Size()
 
 	if err != nil {
@@ -88,8 +98,11 @@ func main() {
 
 	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+fs(width/2)+"\u2666", len)) // diamond
 
-	termbox.Flush()
+	err = termbox.Flush()
 
+	if err != nil {
+		log.Fatal(err)
+	}
 	currLine := 1
 	fileDisplay := 0
 	var inFile *os.File
@@ -107,12 +120,21 @@ mainloop:
 				main()
 
 			case termbox.KeyCtrlM:
+				var err error
 				fileDisplay++
 				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
+				err = tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
+				if err != nil {
+					log.Fatal(err)
+				}
 				inFile, _ = os.Open(files[line-2].Name())
-				defer inFile.Close()
 
+				defer func() {
+					err = f.Close()
+					if err != nil {
+						log.Fatal(err)
+					}
+				}()
 				printRange(inFile, 0, height, width)
 
 				termbox.Flush()
