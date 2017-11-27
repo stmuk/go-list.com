@@ -68,6 +68,17 @@ func fs(width int) string {
 }
 
 func main() {
+	err := termbox.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer termbox.Close()
+
+	fileName := fileSelect()
+	displayFile(fileName)
+}
+
+func fileSelect() string {
 	var err error
 	f, _ := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	defer func() {
@@ -80,13 +91,7 @@ func main() {
 
 	line := 1 // default reverse video line
 
-	err = termbox.Init()
 	width, height := termbox.Size()
-
-	if err != nil {
-		panic(err)
-	}
-	defer termbox.Close()
 
 	files, err := ioutil.ReadDir("./")
 	if err != nil {
@@ -150,7 +155,7 @@ fileselect:
 		}
 	}
 	fileName := files[line-2].Name()
-	displayFile(fileName)
+	return fileName
 }
 
 func displayFile(fileName string) {
