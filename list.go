@@ -88,14 +88,19 @@ func main() {
 	}
 	defer termbox.Close()
 
-	files, _ := ioutil.ReadDir("./")
+	files, err := ioutil.ReadDir("./")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	i := redraw(line, files)
 
 	len := i - 2
 
+	// first line
 	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+fs(width), len))
 
+	// last line
 	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+fs(width/2)+"\u2666", len)) // diamond
 
 	err = termbox.Flush()
@@ -142,10 +147,12 @@ mainloop:
 				continue mainloop
 
 			case termbox.KeyArrowUp:
+				log.Print("wibble")
 				if fileDisplay == 0 {
 					if line != 1 {
 						line--
 					}
+					_ = redraw(line, files)
 				} else if currLine != 0 {
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine--
