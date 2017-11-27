@@ -77,14 +77,16 @@ func fs(width int) string {
 }
 
 func main() {
-	err := termbox.Init()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer termbox.Close()
+	for {
+		err := termbox.Init()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer termbox.Close()
 
-	fileName := fileSelect()
-	displayFile(fileName)
+		fileName := fileSelect()
+		displayFile(fileName)
+	}
 }
 
 func fileSelect() string {
