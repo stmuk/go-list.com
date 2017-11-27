@@ -106,6 +106,7 @@ func main() {
 	currLine := 1
 	fileDisplay := 0
 	var inFile *os.File
+
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -123,7 +124,7 @@ mainloop:
 				var err error
 				fileDisplay++
 				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-				err = tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
+				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -169,6 +170,10 @@ mainloop:
 				continue mainloop
 
 			default:
+				if ev.Ch != 0 && (string(ev.Ch) == "q" || string(ev.Ch) == "x") {
+					os.Exit(1)
+				}
+
 				continue mainloop
 			}
 		case termbox.EventError:
