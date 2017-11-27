@@ -108,80 +108,107 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	currLine := 1
-	fileDisplay := 0
-	var inFile *os.File
 
-mainloop:
+fileselect:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
 
 			case termbox.KeyEsc:
-				if fileDisplay == 0 {
-					break mainloop
-				}
-				fileDisplay = 0
-				main()
+				os.Exit(1)
 
+				// enter file
 			case termbox.KeyCtrlM:
-				var err error
-				fileDisplay++
-				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-				tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, files[line-2].Name())
-				if err != nil {
-					log.Fatal(err)
-				}
-				inFile, _ = os.Open(files[line-2].Name())
-
-				defer func() {
-					err = f.Close()
-					if err != nil {
-						log.Fatal(err)
-					}
-				}()
-				printRange(inFile, 0, height, width)
-
-				termbox.Flush()
-				continue mainloop
+				break fileselect
 
 			case termbox.KeyArrowUp:
-				log.Print("wibble")
-				if fileDisplay == 0 {
-					if line != 1 {
-						line--
-					}
-					_ = redraw(line, files)
-				} else if currLine != 0 {
-					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-					currLine--
-					printRange(inFile, currLine, height, width)
+				if line != 1 {
+					line--
 				}
+				_ = redraw(line, files)
 				termbox.Flush()
-				continue mainloop
+				continue fileselect
 
 			case termbox.KeyArrowDown:
-				if fileDisplay == 0 {
-					if line != i-1 {
-						line++
-					}
-					_ = redraw(line, files)
-				} else if currLine != height {
-					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-					currLine++
-					log.Printf("down: %v", currLine)
-					printRange(inFile, currLine, height, width)
+				if line != i-1 {
+					line++
 				}
+				_ = redraw(line, files)
 				termbox.Flush()
-				continue mainloop
+				continue fileselect
 
 			default:
 				if ev.Ch != 0 && (string(ev.Ch) == "q" || string(ev.Ch) == "x") {
 					os.Exit(1)
 				}
 
-				continue mainloop
+				continue fileselect
+			}
+		case termbox.EventError:
+			panic(ev.Err)
+		}
+	}
+	fileName := files[line-2].Name()
+	displayFile(fileName)
+}
+
+func displayFile(fileName string) {
+	width, height := termbox.Size() // XXX
+	currLine := 1
+	inFile, err := os.Open(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer func() {
+		err = inFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// enter file
+	termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fileName)
+	printRange(inFile, 0, height, width)
+
+	termbox.Flush()
+
+filedisplay:
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			switch ev.Key {
+
+			case termbox.KeyEsc:
+				break filedisplay
+
+			case termbox.KeyArrowUp:
+				if currLine != 0 {
+					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+					currLine--
+					printRange(inFile, currLine, height, width)
+				}
+				termbox.Flush()
+				continue filedisplay
+
+			case termbox.KeyArrowDown:
+				if currLine != height {
+					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+					currLine++
+					log.Printf("down: %v", currLine)
+					printRange(inFile, currLine, height, width)
+				}
+				termbox.Flush()
+				continue filedisplay
+
+			default:
+				if ev.Ch != 0 && (string(ev.Ch) == "q" || string(ev.Ch) == "x") {
+					os.Exit(1)
+				}
+
+				continue filedisplay
 			}
 		case termbox.EventError:
 			panic(ev.Err)
