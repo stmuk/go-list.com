@@ -51,10 +51,19 @@ func redraw(line int, files []os.FileInfo) int {
 	for _, f := range files {
 
 		if line == i {
-			tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, "\u2193") // down arrow
+			if f.IsDir() {
+				tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, "\u2193") // down arrow
+			} else {
+				tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, " ")
+			}
 			tbprint(1, i, termbox.ColorBlack, termbox.ColorWhite, (f.Name()))
 		} else {
-			tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, "\u2193")
+			if f.IsDir() {
+				tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, "\u2193")
+			} else {
+				tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, " ")
+			}
+
 			tbprint(1, i, termbox.ColorDefault, termbox.ColorDefault, (f.Name()))
 		}
 		i++
