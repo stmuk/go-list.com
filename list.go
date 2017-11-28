@@ -10,7 +10,44 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+func main() {
+	f, err := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	log.SetOutput(f)
+
+	err = termbox.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer termbox.Close()
+
+	for {
+		fileName := fileSelect("./")
+
+		fi, err := os.Lstat(fileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if fi.Mode().IsDir() {
+			os.Chdir(fileName)
+			fileName = fileSelect("./")
+		}
+
+		displayFile(fileName)
+	}
+}
+
 func printRange(inFile *os.File, start int, finish int, width int) {
+
 	count := 1
 	_, err := inFile.Seek(0, 0)
 	if err != nil {
@@ -76,43 +113,11 @@ func fs(width int) string {
 	return fmt.Sprintf("%%-%vv", width)
 }
 
-func main() {
-	f, err := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		err := f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-	log.SetOutput(f)
-
-	err = termbox.Init()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer termbox.Close()
-
-	for {
-		fileName := fileSelect("./")
-
-		fi, err := os.Lstat(fileName)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if fi.Mode().IsDir() {
-			os.Chdir(fileName)
-			fileName = fileSelect("./")
-		}
-
-		displayFile(fileName)
-	}
-}
-
 func fileSelect(dirName string) string {
+
+	const coldef = termbox.ColorDefault
+	termbox.Clear(coldef, coldef)
+
 	line := 1 // default reverse video line
 
 	width, height := termbox.Size()
@@ -183,6 +188,9 @@ fileselect:
 }
 
 func displayFile(fileName string) {
+	const coldef = termbox.ColorDefault
+	termbox.Clear(coldef, coldef)
+
 	width, height := termbox.Size() // XXX
 	currLine := 1
 	inFile, err := os.Open(fileName)
