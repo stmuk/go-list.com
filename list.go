@@ -123,6 +123,7 @@ func fileSelect(dirName string) string {
 	width, height := termbox.Size()
 
 	files, err := ioutil.ReadDir(dirName)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -183,7 +184,12 @@ fileselect:
 			panic(ev.Err)
 		}
 	}
-	fileName := files[line-2].Name()
+	var fileName string
+	if line > 1 {
+		fileName = files[line-2].Name()
+	} else {
+		fileName = "../"
+	}
 	return fileName
 }
 
