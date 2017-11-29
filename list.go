@@ -36,14 +36,21 @@ func main() {
 	for {
 		fileName := fileSelect()
 
-		fi, err := os.Lstat(fileName)
-		if err != nil {
-			log.Fatal(err)
-		}
+	dir:
+		for {
+			fi, err := os.Lstat(fileName)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		if fi.Mode().IsDir() {
-			os.Chdir(fileName)
-			fileName = fileSelect()
+			if fi.Mode().IsDir() {
+
+				os.Chdir(fileName)
+				fileName = fileSelect()
+
+			} else {
+				break dir
+			}
 		}
 
 		displayFile(fileName)
