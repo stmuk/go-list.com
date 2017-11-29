@@ -63,7 +63,7 @@ func printRange(inFile *os.File, start int, finish int, width int) {
 		}
 		count++
 		if count == finish+start {
-			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(padSpace(width)+"", inFile.Name()))
+			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(fs(width)+"", inFile.Name()))
 			break
 		}
 	}
@@ -76,7 +76,7 @@ func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
 	}
 }
 
-func listFiles(line int, files []os.FileInfo) int {
+func redraw(line int, files []os.FileInfo) int {
 
 	if line == 1 {
 		tbprint(0, 1, termbox.ColorBlack, termbox.ColorWhite, "\u2191..") // up arrow
@@ -109,7 +109,7 @@ func listFiles(line int, files []os.FileInfo) int {
 	return i
 }
 
-func padSpace(width int) string {
+func fs(width int) string {
 	return fmt.Sprintf("%%-%vv", width)
 }
 
@@ -128,15 +128,15 @@ func fileSelect(dirName string) string {
 		log.Fatal(err)
 	}
 
-	i := listFiles(line, files)
+	i := redraw(line, files)
 
 	len := i - 2
 
 	// first line
-	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+padSpace(width), len))
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+fs(width), len))
 
 	// last line
-	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+padSpace(width/2)+"\u2666", len)) // diamond
+	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+fs(width/2)+"\u2666", len)) // diamond
 
 	err = termbox.Flush()
 
@@ -162,7 +162,7 @@ fileselect:
 				if line != 1 {
 					line--
 				}
-				_ = listFiles(line, files)
+				_ = redraw(line, files)
 				termbox.Flush()
 				continue fileselect
 
@@ -170,7 +170,7 @@ fileselect:
 				if line != i-1 {
 					line++
 				}
-				_ = listFiles(line, files)
+				_ = redraw(line, files)
 				termbox.Flush()
 				continue fileselect
 
