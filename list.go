@@ -49,7 +49,7 @@ func main() {
 			if fi.Mode().IsDir() {
 
 				os.Chdir(fileName)
-				fileName, currLine = fileSelect(currLine)
+				fileName, currLine = fileSelect(1)
 
 			} else {
 				break dir
