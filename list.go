@@ -151,6 +151,7 @@ fileselect:
 			switch ev.Key {
 
 			case termbox.KeyEsc:
+				termbox.Close() // XXX
 				os.Exit(1)
 
 				// enter file
@@ -174,6 +175,7 @@ fileselect:
 				continue fileselect
 
 			default:
+				termbox.Close()
 				if ev.Ch != 0 && (string(ev.Ch) == "q" || string(ev.Ch) == "x") {
 					os.Exit(1)
 				}
