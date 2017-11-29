@@ -10,7 +10,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func main() {
+func init() {
 	f, err := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
@@ -27,10 +27,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+}
+
+func main() {
 	defer termbox.Close()
 
 	for {
-		fileName := fileSelect("./")
+		fileName := fileSelect()
 
 		fi, err := os.Lstat(fileName)
 		if err != nil {
@@ -39,104 +43,37 @@ func main() {
 
 		if fi.Mode().IsDir() {
 			os.Chdir(fileName)
-			fileName = fileSelect("./")
+			fileName = fileSelect()
 		}
 
 		displayFile(fileName)
 	}
 }
 
-func printRange(inFile *os.File, start int, finish int, width int) {
-
-	count := 1
-	_, err := inFile.Seek(0, 0)
-	if err != nil {
-		log.Fatal(err)
-	}
-	scanner := bufio.NewScanner(inFile)
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		if count >= start {
-			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
-			log.Printf("pr: %v %v ", count, count-start)
-
-		}
-		count++
-		if count == finish+start {
-			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(fs(width)+"", inFile.Name()))
-			break
-		}
-	}
-}
-
-func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
-	for _, c := range msg {
-		termbox.SetCell(x, y, c, fg, bg)
-		x++
-	}
-}
-
-func redraw(line int, files []os.FileInfo) int {
-
-	if line == 1 {
-		tbprint(0, 1, termbox.ColorBlack, termbox.ColorWhite, "\u2191..") // up arrow
-	} else {
-		tbprint(0, 1, termbox.ColorDefault, termbox.ColorDefault, "\u2191..") // up arrow
-	}
-
-	i := 2
-	for _, f := range files {
-
-		if line == i {
-			if f.IsDir() {
-				tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, "\u2193") // down arrow
-			} else {
-				tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, " ")
-			}
-			tbprint(1, i, termbox.ColorBlack, termbox.ColorWhite, (f.Name()))
-		} else {
-			if f.IsDir() {
-				tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, "\u2193")
-			} else {
-				tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, " ")
-			}
-
-			tbprint(1, i, termbox.ColorDefault, termbox.ColorDefault, (f.Name()))
-		}
-		i++
-
-	}
-	return i
-}
-
-func fs(width int) string {
-	return fmt.Sprintf("%%-%vv", width)
-}
-
-func fileSelect(dirName string) string {
+func fileSelect() string {
 
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
 
-	line := 1 // default reverse video line
+	currLine := 1 // default reverse video line
 
 	width, height := termbox.Size()
 
-	files, err := ioutil.ReadDir(dirName)
+	files, err := ioutil.ReadDir(".")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	i := redraw(line, files)
+	i := listFiles(currLine, files)
 
 	len := i - 2
 
 	// first line
-	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+fs(width), len))
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+padSpace(width), len))
 
 	// last line
-	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+fs(width/2)+"\u2666", len)) // diamond
+	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+padSpace(width/2)+"\u2666", len)) // diamond
 
 	err = termbox.Flush()
 
@@ -159,18 +96,18 @@ fileselect:
 				break fileselect
 
 			case termbox.KeyArrowUp:
-				if line != 1 {
-					line--
+				if currLine != 1 {
+					currLine--
 				}
-				_ = redraw(line, files)
+				_ = listFiles(currLine, files)
 				termbox.Flush()
 				continue fileselect
 
 			case termbox.KeyArrowDown:
-				if line != i-1 {
-					line++
+				if currLine != (i - 1) { // XXX
+					currLine++
 				}
-				_ = redraw(line, files)
+				_ = listFiles(currLine, files)
 				termbox.Flush()
 				continue fileselect
 
@@ -187,8 +124,8 @@ fileselect:
 		}
 	}
 	var fileName string
-	if line > 1 {
-		fileName = files[line-2].Name()
+	if currLine > 1 {
+		fileName = files[currLine-2].Name()
 	} else {
 		fileName = "../"
 	}
@@ -278,4 +215,71 @@ filedisplay:
 			panic(ev.Err)
 		}
 	}
+}
+
+func printRange(inFile *os.File, start int, finish int, width int) {
+
+	count := 1
+	_, err := inFile.Seek(0, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	scanner := bufio.NewScanner(inFile)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		if count >= start {
+			tbprint(0, count-start, termbox.ColorWhite, termbox.ColorBlack, scanner.Text())
+			log.Printf("pr: %v %v ", count, count-start)
+
+		}
+		count++
+		if count == finish+start {
+			tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf(padSpace(width)+"", inFile.Name()))
+			break
+		}
+	}
+}
+
+func listFiles(currLine int, files []os.FileInfo) int {
+
+	if currLine == 1 {
+		tbprint(0, 1, termbox.ColorBlack, termbox.ColorWhite, "\u2191..") // up arrow
+	} else {
+		tbprint(0, 1, termbox.ColorDefault, termbox.ColorDefault, "\u2191..") // up arrow
+	}
+
+	i := 2
+	for _, f := range files {
+
+		if currLine == i {
+			if f.IsDir() {
+				tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, "\u2193") // down arrow
+			} else {
+				tbprint(0, i, termbox.ColorBlack, termbox.ColorWhite, " ")
+			}
+			tbprint(1, i, termbox.ColorBlack, termbox.ColorWhite, (f.Name()))
+		} else {
+			if f.IsDir() {
+				tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, "\u2193")
+			} else {
+				tbprint(0, i, termbox.ColorDefault, termbox.ColorDefault, " ")
+			}
+
+			tbprint(1, i, termbox.ColorDefault, termbox.ColorDefault, (f.Name()))
+		}
+		i++
+
+	}
+	return i
+}
+
+func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
+	for _, c := range msg {
+		termbox.SetCell(x, y, c, fg, bg)
+		x++
+	}
+}
+
+func padSpace(width int) string {
+	return fmt.Sprintf("%%-%vv", width)
 }
