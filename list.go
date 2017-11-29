@@ -134,7 +134,7 @@ fileselect:
 	if currLine > 1 {
 		fileName = files[currLine-2].Name()
 	} else {
-		fileName = "../"
+		fileName = ".."
 	}
 	return fileName
 }
@@ -213,7 +213,7 @@ filedisplay:
 
 			default:
 				if ev.Ch != 0 && (string(ev.Ch) == "q" || string(ev.Ch) == "x") {
-					os.Exit(1)
+					break filedisplay
 				}
 
 				continue filedisplay
