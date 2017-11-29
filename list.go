@@ -33,8 +33,11 @@ func init() {
 func main() {
 	defer termbox.Close()
 
+	currLine := 1
+	var fileName string
+
 	for {
-		fileName := fileSelect()
+		fileName, currLine = fileSelect(currLine)
 
 	dir:
 		for {
@@ -46,7 +49,7 @@ func main() {
 			if fi.Mode().IsDir() {
 
 				os.Chdir(fileName)
-				fileName = fileSelect()
+				fileName, currLine = fileSelect(currLine)
 
 			} else {
 				break dir
@@ -57,12 +60,10 @@ func main() {
 	}
 }
 
-func fileSelect() string {
+func fileSelect(currLine int) (string, int) {
 
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
-
-	currLine := 1 // default reverse video line
 
 	width, height := termbox.Size()
 
@@ -136,7 +137,7 @@ fileselect:
 	} else {
 		fileName = ".."
 	}
-	return fileName
+	return fileName, currLine
 }
 
 func displayFile(fileName string) {
