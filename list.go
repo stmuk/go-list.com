@@ -15,12 +15,12 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		err := f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	//	defer func() {
+	//		err := f.Close()
+	//		if err != nil {
+	//			log.Fatal(err)
+	//		}
+	//	}()
 	log.SetOutput(f)
 
 	err = termbox.Init()
@@ -49,7 +49,8 @@ func main() {
 			if fi.Mode().IsDir() {
 
 				os.Chdir(fileName)
-				fileName, currLine = fileSelect(1)
+				fileName, _ = fileSelect(1)
+				currLine = 1
 
 			} else {
 				break dir
@@ -61,6 +62,8 @@ func main() {
 }
 
 func fileSelect(currLine int) (string, int) {
+
+	log.Printf("crap: %d", currLine)
 
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
