@@ -10,17 +10,14 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+var f *os.File
+
 func init() {
-	f, err := os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	var err error
+	f, err = os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//	defer func() {
-	//		err := f.Close()
-	//		if err != nil {
-	//			log.Fatal(err)
-	//		}
-	//	}()
 	log.SetOutput(f)
 
 	err = termbox.Init()
@@ -31,6 +28,13 @@ func init() {
 }
 
 func main() {
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	defer termbox.Close()
 
 	currLine := 1
@@ -49,8 +53,7 @@ func main() {
 			if fi.Mode().IsDir() {
 
 				os.Chdir(fileName)
-				fileName, _ = fileSelect(1)
-				currLine = 1
+				fileName, currLine = fileSelect(1)
 
 			} else {
 				break dir
