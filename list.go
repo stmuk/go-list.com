@@ -14,11 +14,17 @@ var f *os.File
 
 func init() {
 	var err error
-	f, err = os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
+	if os.Getenv("LOG") == "1" {
+
+		f, err = os.OpenFile("list.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.SetOutput(f)
+	} else {
+		log.SetOutput(ioutil.Discard)
 	}
-	log.SetOutput(f)
 
 	err = termbox.Init()
 	if err != nil {
@@ -65,8 +71,6 @@ func main() {
 }
 
 func fileSelect(currLine int) (string, int) {
-
-	log.Printf("crap: %d", currLine)
 
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
