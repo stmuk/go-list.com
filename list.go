@@ -199,16 +199,20 @@ filedisplay:
 				continue filedisplay
 
 			case termbox.KeyPgup:
-				//if (currLine - height) > 1 { // XXX
-				termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
-				currLine -= height - 1
+				if (currLine - (height - 1)) > 1 { // XXX
+					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+					currLine -= (height - 1)
+				} else {
+					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
+					currLine = 0
+				}
+
 				printRange(inFile, currLine, height, width)
-				//}
 				termbox.Flush()
 				continue filedisplay
 
 			case termbox.KeyArrowDown:
-				if currLine != height {
+				if currLine < height { //XXX len of file
 					termbox.Clear(termbox.ColorWhite, termbox.ColorBlack)
 					currLine++
 					log.Printf("down: %v", currLine)
