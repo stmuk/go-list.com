@@ -96,7 +96,7 @@ func fileSelect(currLine int) (string, int) {
 	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, s0+s1)
 
 	// last line
-	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+padSpace(width/2)+"\u2666", len)) // diamond
+	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+padSpace(width)+"\u2666", len)) // diamond
 
 	err = termbox.Flush()
 
