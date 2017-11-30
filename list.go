@@ -83,8 +83,17 @@ func fileSelect(currLine int) (string, int) {
 
 	len := i - 2
 
+	// note poor support for symlinks XXX
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s0 := fmt.Sprintf("LIST File Selection 1 of %d ", len)
+	s1 := fmt.Sprintf(" Path "+padSpace(width), cwd)
+
 	// first line
-	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("LIST File Selection 1 of "+padSpace(width), len))
+	tbprint(0, 0, termbox.ColorBlack, termbox.ColorWhite, s0+s1)
 
 	// last line
 	tbprint(0, height-1, termbox.ColorBlack, termbox.ColorWhite, fmt.Sprintf("Files: "+padSpace(width/2)+"\u2666", len)) // diamond
